@@ -19,6 +19,7 @@ We have trained the exact same 241M architecture on two completely different sci
 | 🧠 **Bio-Brain** | Flywire Connectome (Real Synapses + Neurotransmitters) | `flywire_bio_brain_241m.pth` | [Download Bio-Model]( https://drive.google.com/file/d/13lXRsiAr6qiLvJmhrEjV5hFLf-_EC9i2/view?usp=drivesdk) |
 | 📚 **Language-Brain** | 10M Text Tokens (Wikipedia Co-occurrence Graph) | `language_cognitive_brain_241m.pth` | [Download Lang-Model](https://drive.google.com/file/d/1yDnHIzO0qIJfbBS4-N0Gahfzaga7WnLu/view?usp=drivesdk) |
 | ⚙️ **Configs & Vocab** | Architecture Configs & 3000 Word Vocabulary | `config.json`, `vocab.json` | [Download Configs](👉 https://drive.google.com/file/d/1YHcUmBE7cpChqA2DaMIDFisyTTib0hrV/view?usp=drivesdk) |
+ scroll for links
 
 
 ---
