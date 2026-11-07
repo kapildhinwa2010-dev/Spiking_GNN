@@ -97,7 +97,7 @@ Open `demo/index.html` in any browser — it works fully offline (CDN modules). 
 
 ## 🧠 NeuroSpiking-50M: CI-Trained Model (Dopamine-Gated Local Learning)
 
-**Sabhi repo modules ka use karke** banaya gaya 50M model (`model.py` trunk, hidden 1008 x 12 layers ≈ 50.8M params), jo **GitHub Actions par hi train hota hai** (15-min budget, free CPU runner) — **naya training algorithm**: dopamine-gated 3-factor local learning (**no backprop**):
+**Sabhi repo modules ka use karke** banaya gaya 50M model (`model.py` trunk, hidden 1152 x 12 layers ≈ 50.4M params), jo **GitHub Actions par hi train hota hai** (15-min budget, free CPU runner) — **naya training algorithm**: dopamine-gated 3-factor local learning (**no backprop**):
 
 `python
 dw = lr * reward * eligibility
@@ -201,7 +201,7 @@ python train.py
 ├── dormant_recruitment.py # Research suite: dormant neuron recruitment + ablations
 ├── teaching_cell.py    # Full teaching cell (Hindi comments, 20 core concepts)
 ├── config.json         # Architecture config used by inference.py / evaluate.py
-├── pyproject.toml      # Packaging metadata (neurospiking v0.1.1)
+├── pyproject.toml      # Packaging metadata (neurospiking v0.1.2)
 ├── requirements.txt    # Python dependencies
 ├── scripts/           # download_weights.py, update_readme_results.py (CI)
 ├── Makefile            # One-command setup: make install / test / lint / eval / train / train-50m / weights / demo

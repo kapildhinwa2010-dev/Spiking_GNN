@@ -1,12 +1,12 @@
 {
   "name": "NeuroSpiking-50M",
-  "hidden_dim": 1008,
+  "hidden_dim": 1152,
   "num_layers": 12,
   "num_heads": 16,
   "timesteps": 2,
   "node_dim": 5,
   "edge_dim": 10,
   "num_classes": 10,
-  "estimated_params": 50800000,
+  "estimated_params": 50400000,
   "note": "CI-trainable scale: trained on GitHub Actions with dopamine-gated 3-factor local learning (no backprop)."
 }

@@ -1,8 +1,8 @@
 # ============================================================
 # NEUROSPIKING-50M: DOPAMINE-GATED 3-FACTOR LOCAL LEARNING
 # ============================================================
-# MODEL    : model.py ka WholeBrainSpikingNet, hidden=1008,
-#            12 layers, 16 heads -> ~50.8M params (sabhi repo
+# MODEL    : model.py ka WholeBrainSpikingNet, hidden=1152,
+#            12 layers, 16 heads -> ~50.4M params (sabhi repo
 #            modules ka use: model, memory, tokenizer,
 #            homeostasis, stdp, dopamine).
 # DATA     : 10-topic corpus (deterministic) -> WordTokenizer
@@ -149,7 +149,7 @@ def three_factor_update(W, b, feat, y, lr, reward):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--budget-min", type=float, default=15.0)
-    ap.add_argument("--hidden", type=int, default=1008)
+    ap.add_argument("--hidden", type=int, default=1152)
     ap.add_argument("--layers", type=int, default=12)
     ap.add_argument("--heads", type=int, default=16)
     ap.add_argument("--timesteps", type=int, default=2)

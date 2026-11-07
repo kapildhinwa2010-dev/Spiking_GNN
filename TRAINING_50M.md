@@ -10,11 +10,11 @@ Same architecture jo 241M/500M me hai (`model.py` ka `WholeBrainSpikingNet`), sc
 
 | | 241M | **50M (yeh)** |
 | :--- | :--- | :--- |
-| hidden_dim | 3072 | **1008** |
+| hidden_dim | 3072 | **1152** |
 | num_layers | 8 | **12** |
 | num_heads | 16 | 16 |
 | timesteps | 4 | 2 |
-| params | 241.2M | **~50.8M** |
+| params | 241.2M | **~50.4M** |
 
 Har layer me: multi-head edge-aware graph conv (3D + 10-dim chemical edge features) + surrogate-gradient LIF neuron (learnable decay + threshold).
 
