@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.1] - 2026-11-07
+
+### Added
+- **`dopamine.py`** — Reward-Modulated (3-factor) learning: `dw = lr * reward * eligibility`. Biological credit assignment: reward only strengthens recently-paired synapses (all 5 behaviors validated before shipping)
+- **Automation (no manual steps left)**:
+  - Release workflow: tags + publishes a GitHub Release automatically when `CHANGELOG.md` changes
+  - Pages workflow: deploys the 3D demo to GitHub Pages automatically when `demo/` changes
+  - `scripts/download_weights.py` + `make weights`: one-command download of all pre-trained models from Drive
+- **`Makefile`** — one-command setup: `make install / test / lint / eval / train / weights / demo`
+- Tests: `tests/test_dopamine.py` (6 tests)
+
+### Changed
+- Version bump to 0.1.1; README updated (dopamine module, automation, scripts/Makefile in structure)
+
 ## [0.1.0] - 2026-11-07
 
 First production-ready release of NeuroSpiking.

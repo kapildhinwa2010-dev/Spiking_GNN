@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "neurospiking"
-version = "0.1.0"
-description = "Spiking 3D graph neural networks: membrane memory (KV-cache analog), tokenizer, e-prop local learning, STDP and homeostasis"
+version = "0.1.1"
+description = "Spiking 3D graph neural networks: membrane memory (KV-cache analog), tokenizer, e-prop local learning, STDP, dopamine reward-modulated learning and homeostasis"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [{ name = "Kapil Dhinwa" }]
-keywords = ["spiking-neural-networks", "neuromorphic-computing", "graph-neural-networks", "connectome", "stdp", "e-prop"]
+keywords = ["spiking-neural-networks", "neuromorphic-computing", "graph-neural-networks", "connectome", "stdp", "e-prop", "dopamine"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
@@ -22,11 +22,12 @@ classifiers = [
 [project.optional-dependencies]
 flywire = ["caveclient>=5.0.0"]
 optimizer = ["bitsandbytes>=0.43.0"]
+weights = ["gdown>=5.0"]
 dev = ["pytest>=7.0", "pyflakes>=3.0"]
 
 [tool.setuptools]
 py-modules = [
-    "model", "model_500m", "memory", "tokenizer", "stdp", "homeostasis",
+    "model", "model_500m", "memory", "tokenizer", "stdp", "dopamine", "homeostasis",
     "graph_builder", "train_utils", "evaluate", "train_memory",
     "benchmark", "inference",
 ]

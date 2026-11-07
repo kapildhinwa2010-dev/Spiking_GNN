@@ -1,0 +1,30 @@
+name: Release
+
+# Automatic releases: whenever CHANGELOG.md changes on main, tag
+# the current pyproject version and publish/update the GitHub
+# Release with the changelog as release notes. No manual steps.
+on:
+  push:
+    branches: [main]
+    paths: ["CHANGELOG.md", "pyproject.toml"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: ver
+        run: echo "version=$(grep -m1 '^version' pyproject.toml | cut -d '"' -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Create/update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: neurospiking v${{ steps.ver.outputs.version }}
+          body_path: CHANGELOG.md
+          generate_release_notes: true

@@ -63,9 +63,20 @@ export FLYWIRE_TOKEN="your_token"
 python build_flywire_graph.py   # saves flywire_graph.pt with real neurotransmitter features
 ```
 
+## 🧪 Tests & CI
+
+```bash
+pip install pytest
+pytest tests/ -v
+```
+
+GitHub Actions runs the test suite (CPU PyTorch) on every push and pull request to ``main``.
+
+---
+
 ## 🌐 Interactive 3D Demo
 
-Open `demo/index.html` in any browser (or enable GitHub Pages: Settings -> Pages -> deploy from `main` / `/demo`). A 150-neuron 3D brain graph where:
+Open `demo/index.html` in any browser — it works fully offline (CDN modules). The Pages workflow also deploys it automatically to GitHub Pages on every demo change. A 150-neuron 3D brain graph where:
 
 - **Click a neuron = sustained current injection (12 steps)** — firing propagates multi-hop through the network
 - Excitatory (blue/yellow) vs inhibitory (red) neurons, refractory periods, E/I balance
@@ -77,6 +88,7 @@ Open `demo/index.html` in any browser (or enable GitHub Pages: Settings -> Pages
 ## 🧬 Biological Learning Modules
 
 - **`stdp.py`** — Spike-Timing Dependent Plasticity: pre-before-post potentiates, post-before-pre depresses (pairwise kernel + online trace version)
+- **`dopamine.py`** — **NEW**: Reward-Modulated (3-factor) learning: `dw = lr * reward * eligibility`. Just like real dopamine, reward only strengthens synapses that fired recently (validated: reward-after-pairing potentiates, late reward ~0, no pairing -> no change, negative reward depresses)
 - **`homeostasis.py`** — adaptive thresholds drive firing rates toward a target (the biological anti-seizure mechanism)
 - **`memory.py`** now also includes `MultiTimescaleMemory` — fast (seconds-like) + slow (minutes-like) working-memory traces
 - **`configs/`** — 241M / 500M / **800M** architecture configs (800M: hidden 3968, 16 layers, ~799M by scaling estimate from the trained checkpoints)
@@ -85,20 +97,10 @@ Open `demo/index.html` in any browser (or enable GitHub Pages: Settings -> Pages
 
 ## 📦 Releases & Versioning
 
-- Current version: **0.1.0** (`pyproject.toml`, see `CHANGELOG.md`)
-- Model weights will be published as **GitHub Releases** assets (until then, see the Model Zoo Drive links above)
+- Current version: **0.1.1** (`pyproject.toml`, see `CHANGELOG.md`)
+- **Automatic Releases**: the Release workflow tags and publishes a GitHub Release automatically whenever `CHANGELOG.md` changes — no manual steps
+- **Weights in one command**: `make weights` (or `python scripts/download_weights.py`) downloads all pre-trained models from Drive automatically
 - See `CONTRIBUTING.md` to contribute and `MODEL_CARD.md` for intended use and limitations
-
----
-
-## 🧪 Tests & CI
-
-```bash
-pip install pytest
-pytest tests/ -v
-```
-
-GitHub Actions runs the test suite (CPU PyTorch) on every push and pull request to ``main``.
 
 ---
 
@@ -170,6 +172,7 @@ python train.py
 ├── tokenizer.py        # Word tokenizer: vocab.json, encode/decode, text -> graph
 ├── memory.py           # MembraneCache (KV-cache analog), working + multi-timescale memory
 ├── stdp.py             # Spike-timing dependent plasticity (biological learning)
+├── dopamine.py        # Reward-modulated (3-factor) learning - biological RL
 ├── homeostasis.py      # Adaptive thresholds (biological anti-seizure)
 ├── demo/index.html     # Interactive 3D spiking brain (three.js, browser)
 ├── benchmark.py        # Inference speed benchmark
@@ -177,10 +180,12 @@ python train.py
 ├── dormant_recruitment.py # Research suite: dormant neuron recruitment + ablations
 ├── teaching_cell.py    # Full teaching cell (Hindi comments, 20 core concepts)
 ├── config.json         # Architecture config used by inference.py / evaluate.py
-├── pyproject.toml      # Packaging metadata (neurospiking v0.1.0)
+├── pyproject.toml      # Packaging metadata (neurospiking v0.1.1)
 ├── requirements.txt    # Python dependencies
+├── scripts/           # Helper scripts (download_weights.py - auto-fetch Drive models)
+├── Makefile            # One-command setup: make install / test / eval / train / weights    # Python dependencies
 ├── tests/              # Pytest suite (run by GitHub Actions on every push)
-├── .github/            # CI (tests + advisory lint) and issue/PR templates
+├── .github/            # CI (tests + lint), AUTO-Release + AUTO-Pages-deploy workflows, templates
 ├── CONTRIBUTING.md · CHANGELOG.md · MODEL_CARD.md
 ├── LICENSE             # MIT
 ├── .gitignore          # Ignores heavy .pth files and datasets
