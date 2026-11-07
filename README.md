@@ -95,9 +95,29 @@ Open `demo/index.html` in any browser — it works fully offline (CDN modules). 
 
 ---
 
+## 🧠 NeuroSpiking-50M: CI-Trained Model (Dopamine-Gated Local Learning)
+
+**Sabhi repo modules ka use karke** banaya gaya 50M model (`model.py` trunk, hidden 1008 x 12 layers ≈ 50.8M params), jo **GitHub Actions par hi train hota hai** (15-min budget, free CPU runner) — **naya training algorithm**: dopamine-gated 3-factor local learning (**no backprop**):
+
+`python
+dw = lr * reward * eligibility
+reward = +1.0  # sahi prediction (dopamine high)
+reward = +0.25 # galat prediction (low dopamine — validated: zero-reward errors pe learning 0% rehti hai!)
+`
+
+Kaise banaya / data / training: `TRAINING_50M.md` | Retrain: Actions tab → "Train 50M model" → Run workflow | Config: `configs/50m.json` | `make train-50m`
+
+### 📈 Latest CI Training Results
+
+<!-- 50M-RESULTS:START -->
+Training pending — Actions tab me "Train 50M model" workflow run karo, results yahan automatically aa jayenge.
+<!-- 50M-RESULTS:END -->
+
+---
+
 ## 📦 Releases & Versioning
 
-- Current version: **0.1.1** (`pyproject.toml`, see `CHANGELOG.md`)
+- Current version: **0.1.2** (`pyproject.toml`, see `CHANGELOG.md`)
 - **Automatic Releases**: the Release workflow tags and publishes a GitHub Release automatically whenever `CHANGELOG.md` changes — no manual steps
 - **Weights in one command**: `make weights` (or `python scripts/download_weights.py`) downloads all pre-trained models from Drive automatically
 - See `CONTRIBUTING.md` to contribute and `MODEL_CARD.md` for intended use and limitations
@@ -161,12 +181,13 @@ python train.py
 `text
 ├── model.py            # Core PyTorch architecture (Spiking Neurons & Graph Convs)
 ├── model_500m.py       # 500M architecture (~503M params, trunc-normal init)
-├── configs/           # 241M / 500M / 800M architecture configs
+├── configs/           # 241M / 500M / 50M / 800M architecture configs
 ├── graph_builder.py    # Synthetic 3D graph generator (k-NN + long-range + chemistry)
 ├── train_utils.py      # 8-bit optimizer, Drive checkpointing helpers
 ├── train.py            # Data pipeline, graph construction, and 241M training loop
 ├── train_500m.py       # 500M training pipeline (modular, uses the files above)
 ├── train_memory.py     # NEW training way: e-prop local online learning vs BPTT
+├── train_50m.py       # 50M model: dopamine-gated 3-factor local training (CI-ready)
 ├── evaluate.py         # Sparsity, hub suppression, lesion & semantic metrics
 ├── build_flywire_graph.py # (Experimental) Real Flywire connectome -> flywire_graph.pt
 ├── tokenizer.py        # Word tokenizer: vocab.json, encode/decode, text -> graph
@@ -182,11 +203,11 @@ python train.py
 ├── config.json         # Architecture config used by inference.py / evaluate.py
 ├── pyproject.toml      # Packaging metadata (neurospiking v0.1.1)
 ├── requirements.txt    # Python dependencies
-├── scripts/           # Helper scripts (download_weights.py - auto-fetch Drive models)
-├── Makefile            # One-command setup: make install / test / eval / train / weights    # Python dependencies
+├── scripts/           # download_weights.py, update_readme_results.py (CI)
+├── Makefile            # One-command setup: make install / test / lint / eval / train / train-50m / weights / demo
 ├── tests/              # Pytest suite (run by GitHub Actions on every push)
 ├── .github/            # CI (tests + lint), AUTO-Release + AUTO-Pages-deploy workflows, templates
-├── CONTRIBUTING.md · CHANGELOG.md · MODEL_CARD.md
+├── CONTRIBUTING.md · CHANGELOG.md · MODEL_CARD.md · TRAINING_50M.md
 ├── LICENSE             # MIT
 ├── .gitignore          # Ignores heavy .pth files and datasets
 └── README.md           # Project documentation

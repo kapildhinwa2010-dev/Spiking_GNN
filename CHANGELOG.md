@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.2] - 2026-11-07
+
+### Added
+- **NeuroSpiking-50M**: `model.py` trunk at hidden 1008 x 12 layers (~50.8M params), config in `configs/50m.json`
+- **`train_50m.py`** — NEW training algorithm: **dopamine-gated 3-factor local learning** (`dw = lr * reward * eligibility`, no backprop). Uses ALL modules: model, memory (MembraneCache across samples), tokenizer (topic corpus -> co-occurrence graph), homeostasis (threshold adaptation), stdp (plasticity index), dopamine (reward semantics)
+- **Validation discovery**: zero-reward errors pe network 0% accuracy pe atki rehti hai — low-dopamine error signal (+0.25) hi learning enable karta hai
+- **CI training workflow** (`train_50m.yml`): 15-min budget training on free GitHub Actions runner, results JSON + README table auto-commit (`[skip ci]`)
+- `scripts/update_readme_results.py`, `TRAINING_50M.md` (model/data/training docs), `tests/test_train_50m.py` (4 tests), `make train-50m`
+
 ## [0.1.1] - 2026-11-07
 
 ### Added

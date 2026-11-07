@@ -1,0 +1,48 @@
+name: Train 50M model
+
+# 50M model ko GitHub Actions par train karta hai (15-min budget),
+# results README me automatically daal kar commit karta hai.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["train_50m.py", ".github/workflows/train_50m.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install numpy
+
+      - name: Train 50M model (15 min budget)
+        run: python train_50m.py --budget-min 15
+
+      - name: Update README with results
+        run: python scripts/update_readme_results.py
+
+      - name: Save results artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: train-50m-results
+          path: train_50m_results.json
+
+      - name: Commit results to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add train_50m_results.json README.md
+          git commit -m "chore: 50M CI training results (auto) [skip ci]" || echo "nothing to commit"
+          git push

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "neurospiking"
-version = "0.1.1"
+version = "0.1.2"
 description = "Spiking 3D graph neural networks: membrane memory (KV-cache analog), tokenizer, e-prop local learning, STDP, dopamine reward-modulated learning and homeostasis"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -28,6 +28,6 @@ dev = ["pytest>=7.0", "pyflakes>=3.0"]
 [tool.setuptools]
 py-modules = [
     "model", "model_500m", "memory", "tokenizer", "stdp", "dopamine", "homeostasis",
-    "graph_builder", "train_utils", "evaluate", "train_memory",
+    "graph_builder", "train_utils", "evaluate", "train_memory", "train_50m",
     "benchmark", "inference",
 ]
