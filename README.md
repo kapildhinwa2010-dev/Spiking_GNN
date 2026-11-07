@@ -74,6 +74,29 @@ GitHub Actions runs the test suite (CPU PyTorch) on every push and pull request 
 
 ---
 
+## 🧠 Memory, KV-Cache & Tokenizer
+
+Spiking networks have a natural memory: the **membrane potential**. This repo now ships:
+
+- **`tokenizer.py`** — word-level tokenizer: loads/saves `vocab.json`, `<unk>` handling, text → co-occurrence graph edges
+- **`memory.py`** — the spiking **KV-cache**: `MembraneCache` + `forward_cached()` keep membrane potentials **across** forward calls (the brain keeps thinking instead of resetting every call); `SpikingMemory` (working-memory trace + top-k recall); `EligibilityTrace` (e-prop style local learning)
+- **`train_memory.py`** — a **new training way**: **local eligibility-trace (e-prop style) online learning — no backprop through time** — vs standard surrogate-gradient BPTT, on a delayed match-to-sample task that requires memory across 6 silent steps. In validation runs both ways reached ~0 loss (100% pattern match).
+
+```python
+from tokenizer import WordTokenizer
+from memory import MembraneCache, forward_cached
+
+tok = WordTokenizer.load("vocab.json")
+cache = MembraneCache(num_nodes=len(tok), hidden_dim=3072, num_layers=8)
+rates = forward_cached(model, x, edge_index, edge_attr, cache)  # membranes persist between calls
+```
+
+```bash
+python train_memory.py   # runs the e-prop vs BPTT comparison, writes train_memory_results.json
+```
+
+---
+
 ## 🏗️ Architecture
 - **Neuron Model:** Sigmoid-based Surrogate LIF (Leaky Integrate-and-Fire) with learnable decay and threshold.
 - **Spatial Conv:** Multi-Head Edge-Aware Graph Convolution with 3D spatial + 6 chemical features.
@@ -109,8 +132,11 @@ python train.py
 ├── model.py            # Core PyTorch architecture (Spiking Neurons & Graph Convs)
 ├── train.py            # Data pipeline, graph construction, and 241M training loop
 ├── train_500m.py       # 500M parameter variant (8-bit optimizer, Drive checkpointing)
+├── train_memory.py     # NEW training way: e-prop local online learning vs BPTT
 ├── evaluate.py         # Sparsity, hub suppression, lesion & semantic metrics
 ├── build_flywire_graph.py # (Experimental) Real Flywire connectome -> flywire_graph.pt
+├── tokenizer.py        # Word tokenizer: vocab.json, encode/decode, text -> graph
+├── memory.py           # Spiking memory: MembraneCache (KV-cache analog), working memory
 ├── benchmark.py        # Inference speed benchmark
 ├── inference.py        # Interactive CLI to stimulate brain nodes
 ├── dormant_recruitment.py # Research suite: dormant neuron recruitment + ablations
