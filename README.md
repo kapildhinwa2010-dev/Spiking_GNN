@@ -130,8 +130,11 @@ python train.py
 ## 📂 Project Structure
 ```text
 ├── model.py            # Core PyTorch architecture (Spiking Neurons & Graph Convs)
+├── model_500m.py       # 500M architecture (~503M params, trunc-normal init)
+├── graph_builder.py    # Synthetic 3D graph generator (k-NN + long-range + chemistry)
+├── train_utils.py      # 8-bit optimizer, Drive checkpointing helpers
 ├── train.py            # Data pipeline, graph construction, and 241M training loop
-├── train_500m.py       # 500M parameter variant (8-bit optimizer, Drive checkpointing)
+├── train_500m.py       # 500M training pipeline (modular, uses the files above)
 ├── train_memory.py     # NEW training way: e-prop local online learning vs BPTT
 ├── evaluate.py         # Sparsity, hub suppression, lesion & semantic metrics
 ├── build_flywire_graph.py # (Experimental) Real Flywire connectome -> flywire_graph.pt
