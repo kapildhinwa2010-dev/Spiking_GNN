@@ -110,7 +110,24 @@ Kaise banaya / data / training: `TRAINING_50M.md` | Retrain: Actions tab → "Tr
 ### 📈 Latest CI Training Results
 
 <!-- 50M-RESULTS:START -->
-Training pending — Actions tab me "Train 50M model" workflow run karo, results yahan automatically aa jayenge.
+**Model:** NeuroSpiking-50M (WholeBrainSpikingNet hidden 1152 x 12 layers x 16 heads)  
+**Parameters:** 50,398,858
+
+| Metric | Value |
+| :--- | :--- |
+| Test accuracy (before training) | 0.0% |
+| Test accuracy (after training) | **0.0%** |
+| Test loss (before -> after) | 2.303 -> 10.449 |
+| Training algorithm | Dopamine-gated 3-factor local learning (dw = lr * reward * eligibility; no BPTT) |
+| Training data | 200 sentences / 10 topics / 83-word vocab co-occurrence graph (tokenizer.py) |
+| Epochs / samples | 22 / 3401 |
+| Train accuracy trajectory | 13% -> 6% -> 11% -> 9% -> 12% -> 13% -> 16% -> 5% |
+| Spike sparsity (rates < 0.1) | 26.5% |
+| STDP plasticity index | 0.0 |
+| Membrane-cache updates (memory persistence) | 3482 |
+| CI runtime | 15.18 min |
+
+_Trained on GitHub Actions (free 2-core CPU runner) with the dopamine-gated 3-factor rule - no backprop through time, fully local updates. Full details: TRAINING_50M.md_
 <!-- 50M-RESULTS:END -->
 
 ---

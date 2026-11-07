@@ -1,0 +1,70 @@
+{
+  "model": "NeuroSpiking-50M (WholeBrainSpikingNet hidden 1152 x 12 layers x 16 heads)",
+  "parameters": 50398858,
+  "training_algorithm": "Dopamine-gated 3-factor local learning (dw = lr * reward * eligibility; no BPTT)",
+  "training_data": "200 sentences / 10 topics / 83-word vocab co-occurrence graph (tokenizer.py)",
+  "biological_modules_used": [
+    "model.py",
+    "memory.py (MembraneCache across samples)",
+    "tokenizer.py",
+    "homeostasis.py (threshold adaptation)",
+    "stdp.py (plasticity index)",
+    "dopamine.py (reward semantics)"
+  ],
+  "test_start": {
+    "accuracy": 0.0,
+    "loss": 2.3026
+  },
+  "test_final": {
+    "accuracy": 0.0,
+    "loss": 10.4493
+  },
+  "epochs_completed": 22,
+  "samples_trained": 3401,
+  "spike_sparsity": 0.2651,
+  "stdp_plasticity_index": 0.0,
+  "membrane_cache_updates": 3482,
+  "history": [
+    {
+      "epoch": 15,
+      "train_acc": 0.1313,
+      "train_loss": 8.736
+    },
+    {
+      "epoch": 16,
+      "train_acc": 0.0563,
+      "train_loss": 9.1447
+    },
+    {
+      "epoch": 17,
+      "train_acc": 0.1125,
+      "train_loss": 10.283
+    },
+    {
+      "epoch": 18,
+      "train_acc": 0.0875,
+      "train_loss": 13.7453
+    },
+    {
+      "epoch": 19,
+      "train_acc": 0.125,
+      "train_loss": 13.1499
+    },
+    {
+      "epoch": 20,
+      "train_acc": 0.1313,
+      "train_loss": 11.3282
+    },
+    {
+      "epoch": 21,
+      "train_acc": 0.1562,
+      "train_loss": 9.1227
+    },
+    {
+      "epoch": 22,
+      "train_acc": 0.0488,
+      "train_loss": 9.9322
+    }
+  ],
+  "runtime_min": 15.18
+}
