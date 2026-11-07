@@ -79,9 +79,12 @@ python train.py
 ## 📂 Project Structure
 ```text
 ├── model.py            # Core PyTorch architecture (Spiking Neurons & Graph Convs)
-├── train.py            # Data pipeline, graph construction, and training loop
-├── benchmark.py        # Inference speed, semantic tests, and lesion study
+├── train.py            # Data pipeline, graph construction, and 241M training loop
+├── train_500m.py       # 500M parameter variant (8-bit optimizer, Drive checkpointing)
+├── benchmark.py        # Inference speed benchmark
 ├── inference.py        # Interactive CLI to stimulate brain nodes
+├── dormant_recruitment.py # Research suite: dormant neuron recruitment + ablations
+├── teaching_cell.py    # Full teaching cell (Hindi comments, 20 core concepts)
 ├── requirements.txt    # Python dependencies
 ├── .gitignore          # Ignores heavy .pth files and datasets
 └── README.md           # Project documentation
