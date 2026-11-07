@@ -54,3 +54,19 @@ def test_eligibility_trace_accumulates():
     assert abs(trace.trace[0].item() - 1.95) < 1e-5
     trace.apply(param, lr=0.1, learning_signal=1.0)
     assert param.data[0].item() != 0.0
+
+
+
+def test_multiscale_memory():
+    from memory import MultiTimescaleMemory
+
+    m = MultiTimescaleMemory(10, fast_decay=0.8, slow_decay=0.99)
+    m.update(torch.ones(10))
+    assert m.fast.max().item() > m.slow.max().item()  # fast reacts stronger
+
+    for _ in range(20):
+        m.update(torch.zeros(10))
+    assert m.slow.max().item() > m.fast.max().item()  # slow outlasts fast
+
+    idx = m.recall(3)
+    assert idx.shape == (3,)

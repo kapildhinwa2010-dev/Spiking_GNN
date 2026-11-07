@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NeuroSpiking 3D - Interactive Spiking Brain</title>
+<style>
+  body { margin: 0; overflow: hidden; background: #05060f; color: #e8e8f0; font-family: system-ui, sans-serif; }
+  #ui { position: fixed; top: 16px; left: 16px; background: rgba(10,12,25,.85); padding: 14px 18px; border-radius: 12px; max-width: 330px; }
+  h1 { font-size: 15px; margin: 0 0 6px; }
+  p { font-size: 12px; margin: 4px 0; color: #99a; }
+  button { margin: 3px 4px 0 0; padding: 5px 10px; border: 0; border-radius: 6px; background: #2b3a67; color: #fff; cursor: pointer; font-size: 12px; }
+  button:hover { background: #3d5296; }
+  input[type=range] { width: 100%; }
+  .stats { font-size: 12px; color: #8f8; margin-top: 8px; white-space: pre; }
+</style>
+</head>
+<body>
+<div id="ui">
+  <h1>NeuroSpiking 3D - Interactive Spiking Brain</h1>
+  <p>Drag = rotate | Scroll = zoom | <b>Click a neuron to stimulate it</b></p>
+  <p>Stimulation injects sustained current for 12 steps, so firing propagates through the network (E/I balanced, with refractory periods).</p>
+  <button onclick="resetSim()">Reset</button>
+  <button onclick="setMode('normal')">Normal</button>
+  <button onclick="setMode('sleep')">Sleep</button>
+  <button onclick="setMode('seizure')">Seizure</button>
+  <button onclick="stimulate(Math.floor(Math.random()*N))">Zap random</button>
+  <p>Synapse strength: <span id="wLabel">0.60</span></p>
+  <input type="range" id="wSlider" min="0.2" max="0.95" step="0.05" value="0.6" oninput="setW(this.value)">
+  <p>Background noise: <span id="nLabel">0.00</span></p>
+  <input type="range" id="nSlider" min="0" max="0.3" step="0.02" value="0" oninput="setNoise(this.value)">
+  <div class="stats" id="stats">active: 0%</div>
+</div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ---------- config (simulation core validated: sparse baseline, bounded propagation, dies after stimulus) ----------
+const N = 150;
+let W = 0.6, NOISE = 0.0;
+const DECAY = 0.85, BASE_THRESH = 1.0;
+const REFR = 4;                         // refractory period (steps)
+const INH_FRAC = 0.25, INH_MUL = 2.0;   // inhibitory fraction & strength
+let modeThreshold = BASE_THRESH;
+const typeSign = new Array(N);          // original signs
+const type = new Array(N);              // current effective multiplier
+
+// ---------- graph: 3 nearest neighbours + 1 random long-range ----------
+let seed = 987654321;
+const rand = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+const pos = Array.from({ length: N }, () => [rand() * 2 - 1, rand() * 2 - 1, rand() * 2 - 1]);
+for (let i = 0; i < N; i++) { typeSign[i] = rand() < INH_FRAC ? -1 : 1; type[i] = typeSign[i] < 0 ? -INH_MUL : 1; }
+const nbr = Array.from({ length: N }, () => []);
+for (let i = 0; i < N; i++) {
+  const d = pos.map((p, j) => ({ j, d: j === i ? 1e9 : (p[0]-pos[i][0])**2 + (p[1]-pos[i][1])**2 + (p[2]-pos[i][2])**2 }));
+  d.sort((a, b) => a.d - b.d);
+  for (let k = 0; k < 3; k++) if (i !== d[k].j) { nbr[i].push(d[k].j); nbr[d[k].j].push(i); }
+  const r = Math.floor(rand() * N);
+  if (r !== i) { nbr[i].push(r); nbr[r].push(i); }
+}
+
+// ---------- LIF state ----------
+const mem = new Float32Array(N), refract = new Int8Array(N);
+const spikes = new Uint8Array(N), stim = new Int8Array(N);
+const everFired = new Set();
+
+window.stimulate = (i) => { stim[i] = 12; };  // sustained current injection
+window.resetSim = () => { mem.fill(0); refract.fill(0); spikes.fill(0); stim.fill(0); everFired.clear(); };
+window.setW = (v) => { W = parseFloat(v); document.getElementById('wLabel').textContent = W.toFixed(2); };
+window.setNoise = (v) => { NOISE = parseFloat(v); document.getElementById('nLabel').textContent = NOISE.toFixed(2); };
+window.setMode = (m) => {
+  if (m === 'sleep') { modeThreshold = 2.5; W = 0.6; }
+  else if (m === 'seizure') { modeThreshold = 0.6; W = 0.9; }
+  else { modeThreshold = BASE_THRESH; W = 0.6; }
+  for (let i = 0; i < N; i++) type[i] = typeSign[i] < 0 ? (m === 'seizure' ? 0.0 : -INH_MUL) : 1;
+  document.getElementById('wSlider').value = W;
+  document.getElementById('wLabel').textContent = W.toFixed(2);
+};
+
+// ---------- simulation step (validated core) ----------
+function step() {
+  const prev = spikes.slice();
+  let active = 0;
+  for (let i = 0; i < N; i++) {
+    refract[i] = refract[i] > 0 ? refract[i] - 1 : 0;
+    if (refract[i] > 0) { spikes[i] = 0; continue; }
+    let inc = 0;
+    if (stim[i] > 0) { inc += 1.2; stim[i]--; }
+    if (NOISE > 0 && rand() < 0.05) inc += NOISE;
+    for (const j of nbr[i]) inc += prev[j] * W * type[j];
+    mem[i] = DECAY * mem[i] + inc;
+    if (mem[i] > modeThreshold) { mem[i] = 0; spikes[i] = 1; refract[i] = REFR; active++; everFired.add(i); }
+    else spikes[i] = 0;
+  }
+  return active;
+}
+
+// ---------- three.js scene ----------
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x05060f, 3, 8);
+const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 100);
+camera.position.set(0, 0, 3.4);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+document.body.appendChild(renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+// nodes
+const posArr = new Float32Array(N * 3);
+const colArr = new Float32Array(N * 3);
+const nodeGeo = new THREE.BufferGeometry();
+for (let i = 0; i < N; i++) posArr.set(pos[i], i * 3);
+nodeGeo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+nodeGeo.setAttribute('color', new THREE.BufferAttribute(colArr, 3));
+const nodes = new THREE.Points(nodeGeo, new THREE.PointsMaterial({ size: 0.06, vertexColors: true }));
+scene.add(nodes);
+
+// edges
+const MAX_EDGES = 600;
+const edgePos = new Float32Array(MAX_EDGES * 3);
+let e = 0;
+for (let i = 0; i < N; i++) for (const j of nbr[i]) if (j > i && e < MAX_EDGES * 3 - 3) {
+  edgePos.set(pos[i], e); e += 3;
+  edgePos.set(pos[j], e); e += 3;
+}
+const edgeGeo = new THREE.BufferGeometry();
+edgeGeo.setAttribute('position', new THREE.BufferAttribute(edgePos, 3));
+scene.add(new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: 0x334466, transparent: true, opacity: 0.28 })));
+
+// click -> stimulate nearest node
+const ray = new THREE.Raycaster();
+ray.params.Points.threshold = 0.05;
+const mouse = new THREE.Vector2();
+let downAt = null;
+renderer.domElement.addEventListener('pointerdown', (ev) => { downAt = [ev.clientX, ev.clientY]; });
+renderer.domElement.addEventListener('pointerup', (ev) => {
+  if (!downAt) return;
+  const dx = ev.clientX - downAt[0], dy = ev.clientY - downAt[1];
+  downAt = null;
+  if (dx * dx + dy * dy > 16) return;  // was a drag, not a click
+  mouse.set((ev.clientX / innerWidth) * 2 - 1, -(ev.clientY / innerHeight) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hits = ray.intersectObject(nodes);
+  if (hits.length) { stimulate(hits[0].index); }
+});
+
+// colors
+const cA = new THREE.Color(0.25, 0.35, 0.9);   // resting excitatory (blue)
+const cB = new THREE.Color(1.0, 0.85, 0.2);    // excited (yellow)
+const cInh = new THREE.Color(0.85, 0.2, 0.28); // inhibitory (red)
+const cSpike = new THREE.Color(1, 1, 1);
+const tmp = new THREE.Color();
+
+// main loop
+function animate() {
+  requestAnimationFrame(animate);
+  const active = step();
+  for (let i = 0; i < N; i++) {
+    if (spikes[i]) tmp.copy(cSpike);
+    else if (typeSign[i] < 0) { tmp.copy(cInh).multiplyScalar(0.35 + 0.65 * Math.min(mem[i], 1)); }
+    else tmp.copy(cA).lerp(cB, Math.min(mem[i] / modeThreshold, 1));
+    colArr[i * 3] = tmp.r; colArr[i * 3 + 1] = tmp.g; colArr[i * 3 + 2] = tmp.b;
+  }
+  nodeGeo.attributes.color.needsUpdate = true;
+  document.getElementById('stats').textContent =
+    'active: ' + (active / N * 100).toFixed(1) + '%\nfired (session): ' + everFired.size + ' / ' + N + '\nmode threshold: ' + modeThreshold.toFixed(1);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>

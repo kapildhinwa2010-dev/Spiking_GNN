@@ -1,0 +1,11 @@
+{
+  "name": "NeuroSpiking-241M",
+  "hidden_dim": 3072,
+  "num_layers": 8,
+  "num_heads": 16,
+  "timesteps": 4,
+  "node_dim": 5,
+  "edge_dim": 10,
+  "num_classes": 10,
+  "estimated_params": 241204234
+}

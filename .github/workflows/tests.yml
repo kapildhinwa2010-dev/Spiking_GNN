@@ -22,7 +22,10 @@ jobs:
         run: pip install torch --index-url https://download.pytorch.org/whl/cpu
 
       - name: Install test dependencies
-        run: pip install pytest
+        run: pip install pytest pyflakes numpy
+
+      - name: Lint (advisory)
+        run: pyflakes model.py model_500m.py memory.py tokenizer.py stdp.py homeostasis.py graph_builder.py train_utils.py evaluate.py train_memory.py || true
 
       - name: Run tests
         run: pytest tests/ -v

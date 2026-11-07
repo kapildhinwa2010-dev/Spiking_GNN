@@ -19,7 +19,7 @@ ENV/
 .venv
 
 # Jupyter Notebook Checkpoints
-.ipynb_checkpoints
+.ipynb_checkpoints/
 *.ipynb
 
 # IDEs
@@ -33,3 +33,18 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Experiment outputs
+evaluate_results.json
+train_memory_results.json
+dormant_recruitment_proof/
+
+# Packaging
+build/
+dist/
+*.egg-info/
+
+# Coverage / test caches
+.coverage
+htmlcov/
+.pytest_cache/

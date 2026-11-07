@@ -54,7 +54,7 @@ python evaluate.py                        # full-size (config.json dims)
 python evaluate.py --hidden 256 --nodes 120  # quick CPU run
 ```
 
-```evaluate.py``` computes sparsity, hub suppression, lesion/disinhibition and (if ```vocab.json``` exists) semantic clustering, then writes ```evaluate_results.json```.
+``evaluate.py`` computes sparsity, hub suppression, lesion/disinhibition and (if ``vocab.json`` exists) semantic clustering, then writes ``evaluate_results.json``.
 
 Real connectome data (experimental, needs a Flywire token from https://globalv1.flywire.ai/auth):
 
@@ -63,6 +63,34 @@ export FLYWIRE_TOKEN="your_token"
 python build_flywire_graph.py   # saves flywire_graph.pt with real neurotransmitter features
 ```
 
+## 🌐 Interactive 3D Demo
+
+Open `demo/index.html` in any browser (or enable GitHub Pages: Settings -> Pages -> deploy from `main` / `/demo`). A 150-neuron 3D brain graph where:
+
+- **Click a neuron = sustained current injection (12 steps)** — firing propagates multi-hop through the network
+- Excitatory (blue/yellow) vs inhibitory (red) neurons, refractory periods, E/I balance
+- Modes: **Normal / Sleep / Seizure**, plus synapse-strength and background-noise sliders
+- The simulation core was validated before shipping: sparse baseline, bounded propagation (no runaway), activity dies down after stimulation
+
+---
+
+## 🧬 Biological Learning Modules
+
+- **`stdp.py`** — Spike-Timing Dependent Plasticity: pre-before-post potentiates, post-before-pre depresses (pairwise kernel + online trace version)
+- **`homeostasis.py`** — adaptive thresholds drive firing rates toward a target (the biological anti-seizure mechanism)
+- **`memory.py`** now also includes `MultiTimescaleMemory` — fast (seconds-like) + slow (minutes-like) working-memory traces
+- **`configs/`** — 241M / 500M / **800M** architecture configs (800M: hidden 3968, 16 layers, ~799M by scaling estimate from the trained checkpoints)
+
+---
+
+## 📦 Releases & Versioning
+
+- Current version: **0.1.0** (`pyproject.toml`, see `CHANGELOG.md`)
+- Model weights will be published as **GitHub Releases** assets (until then, see the Model Zoo Drive links above)
+- See `CONTRIBUTING.md` to contribute and `MODEL_CARD.md` for intended use and limitations
+
+---
+
 ## 🧪 Tests & CI
 
 ```bash
@@ -70,7 +98,7 @@ pip install pytest
 pytest tests/ -v
 ```
 
-GitHub Actions runs the test suite (CPU PyTorch) on every push and pull request to ```main```.
+GitHub Actions runs the test suite (CPU PyTorch) on every push and pull request to ``main``.
 
 ---
 
@@ -82,14 +110,14 @@ Spiking networks have a natural memory: the **membrane potential**. This repo no
 - **`memory.py`** — the spiking **KV-cache**: `MembraneCache` + `forward_cached()` keep membrane potentials **across** forward calls (the brain keeps thinking instead of resetting every call); `SpikingMemory` (working-memory trace + top-k recall); `EligibilityTrace` (e-prop style local learning)
 - **`train_memory.py`** — a **new training way**: **local eligibility-trace (e-prop style) online learning — no backprop through time** — vs standard surrogate-gradient BPTT, on a delayed match-to-sample task that requires memory across 6 silent steps. In validation runs both ways reached ~0 loss (100% pattern match).
 
-```python
+`python
 from tokenizer import WordTokenizer
 from memory import MembraneCache, forward_cached
 
 tok = WordTokenizer.load("vocab.json")
 cache = MembraneCache(num_nodes=len(tok), hidden_dim=3072, num_layers=8)
 rates = forward_cached(model, x, edge_index, edge_attr, cache)  # membranes persist between calls
-```
+`
 
 ```bash
 python train_memory.py   # runs the e-prop vs BPTT comparison, writes train_memory_results.json
@@ -128,9 +156,10 @@ python train.py
 ---
 
 ## 📂 Project Structure
-```text
+`text
 ├── model.py            # Core PyTorch architecture (Spiking Neurons & Graph Convs)
 ├── model_500m.py       # 500M architecture (~503M params, trunc-normal init)
+├── configs/           # 241M / 500M / 800M architecture configs
 ├── graph_builder.py    # Synthetic 3D graph generator (k-NN + long-range + chemistry)
 ├── train_utils.py      # 8-bit optimizer, Drive checkpointing helpers
 ├── train.py            # Data pipeline, graph construction, and 241M training loop
@@ -139,19 +168,24 @@ python train.py
 ├── evaluate.py         # Sparsity, hub suppression, lesion & semantic metrics
 ├── build_flywire_graph.py # (Experimental) Real Flywire connectome -> flywire_graph.pt
 ├── tokenizer.py        # Word tokenizer: vocab.json, encode/decode, text -> graph
-├── memory.py           # Spiking memory: MembraneCache (KV-cache analog), working memory
+├── memory.py           # MembraneCache (KV-cache analog), working + multi-timescale memory
+├── stdp.py             # Spike-timing dependent plasticity (biological learning)
+├── homeostasis.py      # Adaptive thresholds (biological anti-seizure)
+├── demo/index.html     # Interactive 3D spiking brain (three.js, browser)
 ├── benchmark.py        # Inference speed benchmark
 ├── inference.py        # Interactive CLI to stimulate brain nodes
 ├── dormant_recruitment.py # Research suite: dormant neuron recruitment + ablations
 ├── teaching_cell.py    # Full teaching cell (Hindi comments, 20 core concepts)
 ├── config.json         # Architecture config used by inference.py / evaluate.py
+├── pyproject.toml      # Packaging metadata (neurospiking v0.1.0)
 ├── requirements.txt    # Python dependencies
 ├── tests/              # Pytest suite (run by GitHub Actions on every push)
-├── .github/workflows/  # CI: tests on push/PR to main
+├── .github/            # CI (tests + advisory lint) and issue/PR templates
+├── CONTRIBUTING.md · CHANGELOG.md · MODEL_CARD.md
 ├── LICENSE             # MIT
 ├── .gitignore          # Ignores heavy .pth files and datasets
 └── README.md           # Project documentation
-```
+`
 
 ---
 

@@ -91,3 +91,26 @@ class EligibilityTrace:
     def apply(self, param, lr, learning_signal):
         with torch.no_grad():
             param.add_(self.trace * (lr * float(learning_signal)))
+
+
+
+class MultiTimescaleMemory(nn.Module):
+    """Working memory on two timescales (fast seconds-like, slow minutes-like).
+    The fast trace reacts strongly to recent input; the slow trace outlasts it."""
+
+    def __init__(self, num_nodes, fast_decay=0.8, slow_decay=0.99):
+        super().__init__()
+        self.register_buffer("fast", torch.zeros(num_nodes))
+        self.register_buffer("slow", torch.zeros(num_nodes))
+        self.register_buffer("fast_decay", torch.tensor(float(fast_decay)))
+        self.register_buffer("slow_decay", torch.tensor(float(slow_decay)))
+
+    def update(self, rates):
+        rates = rates.detach()
+        self.fast = self.fast_decay * self.fast + (1.0 - self.fast_decay) * rates
+        self.slow = self.slow_decay * self.slow + (1.0 - self.slow_decay) * rates
+        return self.fast, self.slow
+
+    def recall(self, k=5, which="slow"):
+        trace = self.slow if which == "slow" else self.fast
+        return torch.topk(trace, k).indices

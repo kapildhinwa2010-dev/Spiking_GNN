@@ -1,0 +1,12 @@
+{
+  "name": "NeuroSpiking-800M",
+  "hidden_dim": 3968,
+  "num_layers": 16,
+  "num_heads": 16,
+  "timesteps": 3,
+  "node_dim": 5,
+  "edge_dim": 10,
+  "num_classes": 10,
+  "estimated_params": 799000000,
+  "note": "Sized by parameter scaling estimate from the 241M and 500M checkpoints (params ~ k * hidden^2 * layers)."
+}
