@@ -6,6 +6,7 @@ import torch
 import torch.nn.functional as F
 from collections import Counter
 import gc
+import json
 from model import WholeBrainSpikingNet
 
 def download_text8():
@@ -54,11 +55,24 @@ def train():
     tokens = download_text8()
     x_full_t, edges_src_t, edges_dst_t, vocab, word_to_id = build_graph(tokens)
     
+    with open("vocab.json", "w", encoding="utf-8") as f:
+        json.dump(vocab, f)
+    print("Saved vocab.json")
+    
     print("Initializing 241M God-Tier Model...")
     model = WholeBrainSpikingNet(
         node_dim=5, edge_dim=10, hidden_dim=3072, 
         num_layers=8, num_heads=16, timesteps=4
     ).to(device)
+    
+    config = {
+        "node_dim": 5, "edge_dim": 10, "hidden_dim": 3072,
+        "num_layers": 8, "num_heads": 16, "timesteps": 4,
+        "num_classes": 10, "weights_file": "god_tier_241m.pth",
+    }
+    with open("config.json", "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=2)
+    print("Saved config.json")
     
     opt = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=30)

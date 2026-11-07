@@ -1,0 +1,12 @@
+{
+  "node_dim": 5,
+  "edge_dim": 10,
+  "hidden_dim": 3072,
+  "num_layers": 8,
+  "num_heads": 16,
+  "timesteps": 4,
+  "num_classes": 10,
+  "dropout": 0.1,
+  "weights_file": "god_tier_241m.pth",
+  "description": "NeuroSpiking-241M architecture config. Used by inference.py and evaluate.py. Bio-Brain / Language-Brain weights: see README Model Zoo."
+}

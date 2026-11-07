@@ -3,6 +3,7 @@
 **Author:** Kapil Dhinwa  
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/16qU6PoYAcMOywR7e0t3mRs7mRpcXyjkP)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://github.com/kapildhinwa2010-dev/neurospiking.3D/actions/workflows/tests.yml/badge.svg)](https://github.com/kapildhinwa2010-dev/neurospiking.3D/actions/workflows/tests.yml)
 
 A **241 Million parameter** Spiking Graph Neural Network trained on real **Flywire Connectome data** (incorporating Neurotransmitters like Dopamine, GABA, Serotonin) and **10 Million Language Tokens**. 
 
@@ -46,6 +47,33 @@ We have trained the exact same 241M architecture on two completely different sci
 
 ---
 
+## 🔬 Evaluation & Reproducibility
+
+```bash
+python evaluate.py                        # full-size (config.json dims)
+python evaluate.py --hidden 256 --nodes 120  # quick CPU run
+```
+
+```evaluate.py``` computes sparsity, hub suppression, lesion/disinhibition and (if ```vocab.json``` exists) semantic clustering, then writes ```evaluate_results.json```.
+
+Real connectome data (experimental, needs a Flywire token from https://globalv1.flywire.ai/auth):
+
+```bash
+export FLYWIRE_TOKEN="your_token"
+python build_flywire_graph.py   # saves flywire_graph.pt with real neurotransmitter features
+```
+
+## 🧪 Tests & CI
+
+```bash
+pip install pytest
+pytest tests/ -v
+```
+
+GitHub Actions runs the test suite (CPU PyTorch) on every push and pull request to ```main```.
+
+---
+
 ## 🏗️ Architecture
 - **Neuron Model:** Sigmoid-based Surrogate LIF (Leaky Integrate-and-Fire) with learnable decay and threshold.
 - **Spatial Conv:** Multi-Head Edge-Aware Graph Convolution with 3D spatial + 6 chemical features.
@@ -61,7 +89,7 @@ pip install -r requirements.txt
 ```
 
 ### 2. Download Pre-trained Weights
-Download your preferred model (`.pth` file) from the **Model Zoo** links above and place it in the root directory.
+Download your preferred model (`.pth` file) from the **Model Zoo** links above and place it in the root directory. `config.json` is already included in the repo, and `train.py` automatically saves `vocab.json` and `config.json` for you.
 
 ### 3. Run Inference (Stimulate the Brain)
 ```bash
@@ -81,11 +109,17 @@ python train.py
 ├── model.py            # Core PyTorch architecture (Spiking Neurons & Graph Convs)
 ├── train.py            # Data pipeline, graph construction, and 241M training loop
 ├── train_500m.py       # 500M parameter variant (8-bit optimizer, Drive checkpointing)
+├── evaluate.py         # Sparsity, hub suppression, lesion & semantic metrics
+├── build_flywire_graph.py # (Experimental) Real Flywire connectome -> flywire_graph.pt
 ├── benchmark.py        # Inference speed benchmark
 ├── inference.py        # Interactive CLI to stimulate brain nodes
 ├── dormant_recruitment.py # Research suite: dormant neuron recruitment + ablations
 ├── teaching_cell.py    # Full teaching cell (Hindi comments, 20 core concepts)
+├── config.json         # Architecture config used by inference.py / evaluate.py
 ├── requirements.txt    # Python dependencies
+├── tests/              # Pytest suite (run by GitHub Actions on every push)
+├── .github/workflows/  # CI: tests on push/PR to main
+├── LICENSE             # MIT
 ├── .gitignore          # Ignores heavy .pth files and datasets
 └── README.md           # Project documentation
 ```

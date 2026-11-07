@@ -23,7 +23,7 @@ def load_brain():
     
     # Load Weights
     try:
-        model.load_state_dict(torch.load("god_tier_241m.pth", map_location=device))
+        model.load_state_dict(torch.load(config.get("weights_file", "god_tier_241m.pth"), map_location=device))
         print("✅ Weights loaded successfully!")
     except FileNotFoundError:
         print("⚠️ No trained weights found. Using randomly initialized brain.")
@@ -54,6 +54,15 @@ def think(model, device, word_id, vocab_size=1000):
 def main():
     model, device = load_brain()
     
+    # Optional: word vocabulary (saved automatically by train.py)
+    vocab = None
+    try:
+        with open("vocab.json", "r", encoding="utf-8") as f:
+            vocab = json.load(f)
+        print("✅ Loaded vocab.json (" + str(len(vocab)) + " words)")
+    except (FileNotFoundError, json.JSONDecodeError):
+        print("⚠️ vocab.json not found - showing node IDs only.")
+    
     print("\n" + "="*50)
     print("🧠 NEUROSPIKING INFERENCE ENGINE")
     print("="*50)
@@ -74,7 +83,8 @@ def main():
                 top_5 = np.argsort(firing_rates)[::-1][:5]
                 print(f"🔥 Top 5 Activated Neurons (Thought Chain):")
                 for rank, idx in enumerate(top_5, 1):
-                    print(f"   {rank}. Node {idx} (Firing Rate: {firing_rates[idx]:.4f})")
+                    word = f" ({vocab[idx]})" if vocab and idx < len(vocab) else ""
+                print(f"   {rank}. Node {idx}{word} (Firing Rate: {firing_rates[idx]:.4f})")
                 print("-" * 50)
             else:
                 print("⚠️ Please enter a number between 0 and 999.")
