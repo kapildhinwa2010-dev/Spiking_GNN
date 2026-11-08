@@ -1,0 +1,53 @@
+name: Train 50M on real English (10-min budget)
+
+# SAWAL: 50M model asli English par 10 min deke kya seekhta hai?
+# 10 Project Gutenberg novels -> sentence-level book classification
+# (10-class). Trunk frozen, dopamine 3-factor readout train hota hai.
+# Results train_50m_english_results.json me auto-commit hote hain.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "train_50m_english.py"
+      - ".github/workflows/train_50m_english.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install numpy
+
+      - name: Train 50M on real English (10 min budget)
+        run: python train_50m_english.py --budget-min 10 2>&1 | tee train_50m_english_ci.log
+
+      - name: Upload logs + results
+        uses: actions/upload-artifact@v4
+        with:
+          name: train-50m-english-results
+          path: |
+            train_50m_english_ci.log
+            train_50m_english_results.json
+
+      - name: Commit results to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add train_50m_english_results.json
+          git commit -m "chore: 50M real-English training results (auto) [skip ci]" || echo "nothing to commit"
+          git pull --rebase origin main || true
+          git push
