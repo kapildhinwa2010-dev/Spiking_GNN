@@ -26,7 +26,8 @@ We have trained the exact same 241M architecture on two completely different sci
 ---
 
 ## ✨ Key Features
-- **Massive Scale:** 241,204,234 parameters with 8 Spiking Layers and 16 Attention Heads.
+- **Massive Scale:** 241,204,234 parameters with 8 Spiking Layers and 
+16 Attention Heads.
 - **Neuro-Transmitter Aware:** Edges are weighted by real biological chemicals (GABA, Glutamate, Dopamine, etc.).
 - **Biological Plausibility:** Exhibits sparse firing, E/I (Excitation/Inhibition) balance, and hub suppression.
 - **Memory Efficient:** Trained on a single 16GB GPU (NVIDIA T4) using advanced **Gradient Checkpointing** (saves 80% VRAM).
@@ -78,7 +79,8 @@ GitHub Actions runs the test suite (CPU PyTorch) on every push and pull request 
 
 Open `demo/index.html` in any browser — it works fully offline (CDN modules). The Pages workflow also deploys it automatically to GitHub Pages on every demo change. A 150-neuron 3D brain graph where:
 
-- **Click a neuron = sustained current injection (12 steps)** — firing propagates multi-hop through the network
+- **Click a neuron = sustained current injection (12 ste
+ps)** — firing propagates multi-hop through the network
 - Excitatory (blue/yellow) vs inhibitory (red) neurons, refractory periods, E/I balance
 - Modes: **Normal / Sleep / Seizure**, plus synapse-strength and background-noise sliders
 - The simulation core was validated before shipping: sparse baseline, bounded propagation (no runaway), activity dies down after stimulation
@@ -97,17 +99,18 @@ Open `demo/index.html` in any browser — it works fully offline (CDN modules). 
 
 ## 🧠 NeuroSpiking-50M: CI-Trained Model (Dopamine-Gated Local Learning)
 
-**Sabhi repo modules ka use karke** banaya gaya 50M model (`model.py` trunk, hidden 1152 x 12 layers ≈ 50.4M params), jo **GitHub Actions par hi train hota hai** (15-min budget, free CPU runner) — **naya training algorithm**: dopamine-gated 3-factor local learning (**no backprop**):
+A 50M model built **using all the repo modules** (`model.py` trunk, hidden 1152 x 12 layers ≈ 50.4M params), trained **entirely on GitHub Actions** (15-min budget, free CPU runner) — with a **new training algorithm**: dopamine-gated 3-factor local learning (**no backprop**):
 
 `python
 dw = lr * reward * eligibility
-reward = +1.0  # sahi prediction (dopamine high)
-reward = +0.25 # galat prediction (low dopamine — validated: zero-reward errors pe learning 0% rehti hai!)
+reward = +1.0  # correct prediction (dopamine high)
+reward = +0.25 # wrong prediction (low dopamine — validated: learning stays 0% on zero-reward errors!)
 `
 
-Kaise banaya / data / training: `TRAINING_50M.md` | Retrain: Actions tab → "Train 50M model" → Run workflow | Config: `configs/50m.json` | `make train-50m`
+How it was built / data / training: `TRAINING_50M.md` | Retrain: Actions tab → "Train 50M model" → Run workflow | Config: `configs/50m.json` | `make train-50m`
 
-### 📈 Latest CI Training Results
+### 📈 Latest CI Training Re
+sults
 
 <!-- 50M-RESULTS:START -->
 **Model:** NeuroSpiking-50M (WholeBrainSpikingNet hidden 1152 x 12 layers x 16 heads)  
@@ -132,9 +135,9 @@ _Trained on GitHub Actions (free 2-core CPU runner) with the dopamine-gated 3-fa
 
 ---
 
-## 🧠 50M Graph Model (500M ka 10x Scale-Down) — CI-Verified Positive Results
+## 🧠 50M Graph Model (10x Scale-Down of the 500M) — CI-Verified Positive Results
 
-**500M pipeline ka exact scale-down** (wahi SpikingGraph3D_500M architecture, hidden 3648 → 1152, 12 layers, 16 heads ≈ **50.4M params**). CPU pe bhi REAL training chalti hai (60 steps) — aur **numeric generalization proof** ke saath:
+**An exact scale-down of the 500M pipeline** (same SpikingGraph3D_500M architecture, hidden 3648 → 1152, 12 layers, 16 heads ≈ **50.4M params**). REAL training runs even on CPU (60 steps) — with **numeric generalization proof**:
 
 Code: `train_50m_graph.py` | Workflow: "Train 50M graph model" | Raw results: `train_50m_graph_results.json`
 
@@ -148,7 +151,7 @@ Code: `train_50m_graph.py` | Workflow: "Train 50M graph model" | Raw results: `t
 | Task | Self-supervised: predict normalized degree from avg firing rate |
 | Mean firing rate / active fraction | 0.3137 / 35.7% |
 
-**Proof kaise:** fixed hold-out seeds (9998/9999) pe training se **pehle vs baad** eval MSE napa gaya — aadhe se bhi kam, yani model **generalize** karta hai, sirf memorize nahi. (Dopamine-50M run ka divergence is pipeline me nahi — plain backprop + grad-clip + cosine LR hai.)
+**How it's proven:** eval MSE was measured **before vs after** training on fixed hold-out seeds (9998/9999) — it dropped to less than half, meaning the model **generalizes** instead of just memorizing. (The Dopamine-50M run's divergence is not present in this pipeline — it uses plain backprop + grad-clip + cosine LR.)
 
 ---
 
@@ -162,7 +165,7 @@ Code: `train_50m_graph.py` | Workflow: "Train 50M graph model" | Raw results: `t
 
 Code: `train_500m.py` + `model_500m.py` | Workflow: "Train 500M model (CPU sanity)" | Raw results: `train_500m_results.json`
 
-> Note: CPU pe ye sanity-proof hai (architecture 503M params me build hota hai aur sahi chalta hai); full 20-step training ke liye GPU (Colab/Kaggle T4/A100) chahiye — script khud device detect karke mode set karta hai.
+> Note: On CPU this is a sanity proof (the architecture builds with 503M params and runs correctly); full 20-step training needs a GPU (Colab/Kaggle T4/A100) — the script auto-detects the device and sets the mode itself.
 
 ---
 
@@ -181,7 +184,8 @@ Spiking networks have a natural memory: the **membrane potential**. This repo no
 
 - **`tokenizer.py`** — word-level tokenizer: loads/saves `vocab.json`, `<unk>` handling, text → co-occurrence graph edges
 - **`memory.py`** — the spiking **KV-cache**: `MembraneCache` + `forward_cached()` keep membrane potentials **across** forward calls (the brain keeps thinking instead of resetting every call); `SpikingMemory` (working-memory trace + top-k recall); `EligibilityTrace` (e-prop style local learning)
-- **`train_memory.py`** — a **new training way**: **local eligibility-trace (e-prop style) online learning — no backprop through time** — vs standard surrogate-gradient BPTT, on a delayed match-to-sample task that requires memory across 6 silent steps. In validation runs both ways reached ~0 loss (100% pattern match).
+- **`train_memory.py`** — a **new training way**: **local eligibility-trace (e-prop style) online learning — no backprop through time** — vs standard surrogate-gradient BPTT, on a delayed match-to-sampl
+e task that requires memory across 6 silent steps. In validation runs both ways reached ~0 loss (100% pattern match).
 
 `python
 from tokenizer import WordTokenizer
@@ -236,7 +240,8 @@ python train.py
 ├── graph_builder.py    # Synthetic 3D graph generator (k-NN + long-range + chemistry)
 ├── train_utils.py      # 8-bit optimizer, Drive checkpointing helpers
 ├── train.py            # Data pipeline, graph construction, and 241M training loop
-├── train_500m.py       # 500M training pipeline (modular, uses the files above)
+├── train_500m.py       # 500M 
+training pipeline (modular, uses the files above)
 ├── train_memory.py     # NEW training way: e-prop local online learning vs BPTT
 ├── train_50m.py       # 50M model: dopamine-gated 3-factor local training (CI-ready)
 ├── train_50m_graph.py # 50M graph model: 500M architecture scale-down (CI: 54% hold-out improvement)
@@ -262,7 +267,8 @@ python train.py
 ├── CONTRIBUTING.md · CHANGELOG.md · MODEL_CARD.md · TRAINING_50M.md
 ├── LICENSE             # MIT
 ├── .gitignore          # Ignores heavy .pth files and datasets
-└── README.md           # Project documentation
+└── README.md           
+# Project documentation
 `
 
 ---
