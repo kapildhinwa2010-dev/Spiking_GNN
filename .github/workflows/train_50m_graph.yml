@@ -1,0 +1,56 @@
+name: Train 50M graph model (500M architecture scale-down)
+
+# 500M pipeline ka 10x scale-down (hidden 1152 x 12L x 16H ~ 50.3M params).
+# train_50m_graph.py: CPU par REAL training (60 steps) + fixed hold-out
+# graphs pe before/after eval MSE -> positive-result ka numeric proof.
+# Results train_50m_graph_results.json me auto-commit hote hain.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "train_50m_graph.py"
+      - "model_500m.py"
+      - "train_utils.py"
+      - "graph_builder.py"
+      - ".github/workflows/train_50m_graph.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install numpy
+
+      - name: Run 50M graph training (CPU pe real 60 steps)
+        run: python train_50m_graph.py 2>&1 | tee train_50m_graph_ci.log
+
+      - name: Upload logs + results
+        uses: actions/upload-artifact@v4
+        with:
+          name: train-50m-graph-results
+          path: |
+            train_50m_graph_ci.log
+            train_50m_graph_results.json
+
+      - name: Commit results to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add train_50m_graph_results.json
+          git commit -m "chore: 50M graph training results (auto) [skip ci]" || echo "nothing to commit"
+          git pull --rebase origin main || true
+          git push
