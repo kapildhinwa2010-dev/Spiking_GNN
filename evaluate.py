@@ -79,13 +79,19 @@ def main():
         None,
     )
     if weights is None:
-        raise FileNotFoundError(
-            "No checkpoint found. Download one from the README Model Zoo "
-            "(flywire_bio_brain_241m.pth / language_cognitive_brain_241m.pth) or pass --weights."
+        print(
+            "No checkpoint found (tried: " + ", ".join(
+                [cfg.get("weights_file")] + [
+                    "flywire_bio_brain_241m.pth",
+                    "language_cognitive_brain_241m.pth",
+                    "god_tier_241m.pth",
+                ]
+            ) + ") -> evaluating a randomly initialized brain (baseline, not trained)."
         )
     try:
-        model.load_state_dict(torch.load(weights, map_location="cpu"))
-        print("Loaded weights: " + weights)
+        if weights is not None:
+            model.load_state_dict(torch.load(weights, map_location="cpu"))
+            print("Loaded weights: " + weights)
     except Exception as exc:
         print("Weights not loaded (" + weights + ") -> " + str(exc))
         print("Evaluating a randomly initialized brain (baseline, not trained).")
