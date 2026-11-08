@@ -54,6 +54,7 @@ def main():
     ap.add_argument("--hidden", type=int, default=None, help="override hidden_dim for quick CPU runs")
     ap.add_argument("--hubs", type=int, default=10)
     ap.add_argument("--trials", type=int, default=3)
+    ap.add_argument("--weights", type=str, default=None, help="path to a .pth checkpoint (default: auto-detect)")
     args = ap.parse_args()
 
     with open("config.json", encoding="utf-8") as f:
@@ -69,7 +70,19 @@ def main():
         timesteps=cfg["timesteps"],
         num_classes=cfg.get("num_classes", 10),
     )
-    weights = cfg.get("weights_file", "god_tier_241m.pth")
+    weights = args.weights or next(
+        (w for w in [cfg.get("weights_file")] + [
+            "flywire_bio_brain_241m.pth",
+            "language_cognitive_brain_241m.pth",
+            "god_tier_241m.pth",
+        ] if w and os.path.exists(w)),
+        None,
+    )
+    if weights is None:
+        raise FileNotFoundError(
+            "No checkpoint found. Download one from the README Model Zoo "
+            "(flywire_bio_brain_241m.pth / language_cognitive_brain_241m.pth) or pass --weights."
+        )
     try:
         model.load_state_dict(torch.load(weights, map_location="cpu"))
         print("Loaded weights: " + weights)
