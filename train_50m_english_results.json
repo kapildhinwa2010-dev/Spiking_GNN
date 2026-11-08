@@ -1,0 +1,67 @@
+{
+  "experiment": "asli English par dopamine-gated 50M training (10 min budget)",
+  "books": [
+    "pride_prejudice",
+    "alice_wonderland",
+    "moby_dick",
+    "sherlock_holmes",
+    "frankenstein",
+    "dracula",
+    "treasure_island",
+    "jane_eyre",
+    "time_machine",
+    "tom_sawyer"
+  ],
+  "sentences": 500,
+  "vocab_nodes": 301,
+  "model": "NeuroSpiking-50M (WholeBrainSpikingNet hidden 1152 x 12 layers x 16 heads)",
+  "parameters": 50398858,
+  "training_algorithm": "Dopamine-gated 3-factor local learning (trunk frozen, no BPTT) + stability fixes: feat-normalize, lr 0.05, W-clamp",
+  "test_start": {
+    "accuracy": 0.1,
+    "loss": 2.3026
+  },
+  "test_final": {
+    "accuracy": 0.1,
+    "loss": 2.4078
+  },
+  "chance_accuracy": 0.1,
+  "epochs_completed": 6,
+  "samples_trained": 2006,
+  "spike_sparsity": 0.0332,
+  "stdp_plasticity_index": 0.0,
+  "history": [
+    {
+      "epoch": 1,
+      "train_acc": 0.0875,
+      "train_loss": 2.3118
+    },
+    {
+      "epoch": 2,
+      "train_acc": 0.1,
+      "train_loss": 2.3318
+    },
+    {
+      "epoch": 3,
+      "train_acc": 0.1,
+      "train_loss": 2.3695
+    },
+    {
+      "epoch": 4,
+      "train_acc": 0.1,
+      "train_loss": 2.3827
+    },
+    {
+      "epoch": 5,
+      "train_acc": 0.1,
+      "train_loss": 2.4172
+    },
+    {
+      "epoch": 6,
+      "train_acc": 0.0,
+      "train_loss": 2.5447
+    }
+  ],
+  "runtime_min": 10.49,
+  "budget_min": 10.0
+}
