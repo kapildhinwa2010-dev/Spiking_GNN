@@ -1,0 +1,11 @@
+{
+  "device": "cpu (GitHub Actions runner)",
+  "parameters": "503,325,514",
+  "successful_steps": null,
+  "total_steps": null,
+  "mean_firing_rate": "0.1932",
+  "active_fraction_pct": null,
+  "sparse_fraction_pct": "80.62",
+  "total_runtime_sec": "17.06",
+  "note": "CPU sanity run - script khud 1 micro-step chalata hai; full 500M training ke liye GPU (Colab/Kaggle T4/A100) chahiye"
+}
