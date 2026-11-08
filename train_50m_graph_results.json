@@ -1,0 +1,22 @@
+{
+  "model": "SpikingGraph3D-50M (500M architecture 10x down: hidden 1152 x 12 layers x 16 heads)",
+  "parameters": 50398858,
+  "device": "cpu",
+  "optimizer": "AdamW",
+  "steps_completed": 60,
+  "total_steps": 60,
+  "train_loss_first": 0.22346921265125275,
+  "train_loss_last": 0.06950443983078003,
+  "eval_mse_before": 0.168374,
+  "eval_mse_after": 0.07742,
+  "eval_improvement_pct": 54.02,
+  "hold_out_seeds": [
+    9998,
+    9999
+  ],
+  "mean_firing_rate": 0.3137,
+  "active_fraction_pct": 35.7,
+  "task": "self-supervised: predict normalized degree from avg firing rate",
+  "note": "500M pipeline ka exact scale-down; hold-out graphs pe before/after MSE = generalization proof",
+  "runtime_min": 1.01
+}
