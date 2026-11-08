@@ -1,0 +1,81 @@
+name: Train 500M model (CPU sanity)
+
+# 500M pipeline ka CPU sanity run: train_500m.py khud detect karta hai
+# ki GPU nahi hai, to 503M model build karke 1 micro-step + quick_eval
+# chalata hai. Full 500M training ke liye GPU (Colab/Kaggle) chahiye -
+# README ka 500M section dekho. Results train_500m_results.json me
+# extract hokar commit ho jaate hain.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "train_500m.py"
+      - "model_500m.py"
+      - "train_utils.py"
+      - "graph_builder.py"
+      - ".github/workflows/train_500m.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install numpy
+
+      - name: Run 500M training script (script khud CPU mode handle karta hai)
+        run: python train_500m.py 2>&1 | tee train_500m_ci.log
+
+      - name: Extract results summary
+        run: |
+          python - <<'EOF'
+          import json, re
+          log = open("train_500m_ci.log", encoding="utf-8", errors="replace").read()
+          def grab(pat):
+              m = re.search(pat, log)
+              return m.group(1) if m else None
+          results = {
+              "device": "cpu (GitHub Actions runner)",
+              "parameters": grab(r"Parameters: ([0-9,]+)"),
+              "successful_steps": grab(r"Successful steps: (d+)/"),
+              "total_steps": grab(r"Successful steps: d+/(d+)"),
+              "mean_firing_rate": grab(r"Mean firing rate: ([0-9.]+)"),
+              "active_fraction_pct": grab(r"Active fraction (>0.5): ([0-9.]+)%"),
+              "sparse_fraction_pct": grab(r"Sparse fraction: ([0-9.]+)%"),
+              "total_runtime_sec": grab(r"Total runtime: ([0-9.]+)"),
+              "note": "CPU sanity run - script khud 1 micro-step chalata hai; full 500M training ke liye GPU (Colab/Kaggle T4/A100) chahiye",
+          }
+          with open("train_500m_results.json", "w") as f:
+              json.dump(results, f, indent=2)
+          print(json.dumps(results, indent=2))
+          EOF
+
+      - name: Upload logs + results
+        uses: actions/upload-artifact@v4
+        with:
+          name: train-500m-results
+          path: |
+            train_500m_ci.log
+            train_500m_results.json
+
+      - name: Commit results to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add train_500m_results.json
+          git commit -m "chore: 500M CPU sanity results (auto) [skip ci]" || echo "nothing to commit"
+          git pull --rebase origin main || true
+          git push
