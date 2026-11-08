@@ -132,6 +132,40 @@ _Trained on GitHub Actions (free 2-core CPU runner) with the dopamine-gated 3-fa
 
 ---
 
+## 🧠 50M Graph Model (500M ka 10x Scale-Down) — CI-Verified Positive Results
+
+**500M pipeline ka exact scale-down** (wahi SpikingGraph3D_500M architecture, hidden 3648 → 1152, 12 layers, 16 heads ≈ **50.4M params**). CPU pe bhi REAL training chalti hai (60 steps) — aur **numeric generalization proof** ke saath:
+
+Code: `train_50m_graph.py` | Workflow: "Train 50M graph model" | Raw results: `train_50m_graph_results.json`
+
+| Metric | Value |
+| :--- | :--- |
+| Parameters | 50,398,858 (~50.4M) |
+| Steps completed | **60/60** (runtime: 1.01 min, free CPU runner) |
+| Train loss (first → last) | 0.2235 → **0.0695** (−69%) |
+| **Hold-out eval MSE (before → after)** | 0.1684 → **0.0774** |
+| **Improvement on unseen graphs** | **54.02%** 🎯 |
+| Task | Self-supervised: predict normalized degree from avg firing rate |
+| Mean firing rate / active fraction | 0.3137 / 35.7% |
+
+**Proof kaise:** fixed hold-out seeds (9998/9999) pe training se **pehle vs baad** eval MSE napa gaya — aadhe se bhi kam, yani model **generalize** karta hai, sirf memorize nahi. (Dopamine-50M run ka divergence is pipeline me nahi — plain backprop + grad-clip + cosine LR hai.)
+
+---
+
+## 🏗️ 500M Pipeline — CPU Sanity Check (CI-Verified)
+
+| Check | Result |
+| :--- | :--- |
+| Parameters build | **503,325,514 (~503M)** ✅ |
+| Forward pass + quick brain scan | ✅ mean firing 0.193, **80.6% sparse** firing |
+| Runtime | 17 sec (CPU sanity mode) |
+
+Code: `train_500m.py` + `model_500m.py` | Workflow: "Train 500M model (CPU sanity)" | Raw results: `train_500m_results.json`
+
+> Note: CPU pe ye sanity-proof hai (architecture 503M params me build hota hai aur sahi chalta hai); full 20-step training ke liye GPU (Colab/Kaggle T4/A100) chahiye — script khud device detect karke mode set karta hai.
+
+---
+
 ## 📦 Releases & Versioning
 
 - Current version: **0.1.2** (`pyproject.toml`, see `CHANGELOG.md`)
@@ -205,6 +239,7 @@ python train.py
 ├── train_500m.py       # 500M training pipeline (modular, uses the files above)
 ├── train_memory.py     # NEW training way: e-prop local online learning vs BPTT
 ├── train_50m.py       # 50M model: dopamine-gated 3-factor local training (CI-ready)
+├── train_50m_graph.py # 50M graph model: 500M architecture scale-down (CI: 54% hold-out improvement)
 ├── evaluate.py         # Sparsity, hub suppression, lesion & semantic metrics
 ├── build_flywire_graph.py # (Experimental) Real Flywire connectome -> flywire_graph.pt
 ├── tokenizer.py        # Word tokenizer: vocab.json, encode/decode, text -> graph
