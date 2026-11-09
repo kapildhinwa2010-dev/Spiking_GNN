@@ -16,6 +16,9 @@ def make_3d_graph(n=32, e=96, seed=0):
     Node features: x, y, z, degree_norm, avg_dist_norm  -> 5 dims
     Edge features: dx, dy, dz, dist, 6 chemical features -> 10 dims
     """
+    if n < 2:
+        raise ValueError("n must be at least 2 to generate graph edges")
+
     rng = np.random.default_rng(seed)
 
     # 3D positions
