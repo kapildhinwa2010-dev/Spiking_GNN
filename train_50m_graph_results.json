@@ -5,18 +5,18 @@
   "optimizer": "AdamW",
   "steps_completed": 60,
   "total_steps": 60,
-  "train_loss_first": 0.22346921265125275,
-  "train_loss_last": 0.06950443983078003,
-  "eval_mse_before": 0.168374,
-  "eval_mse_after": 0.07742,
-  "eval_improvement_pct": 54.02,
+  "train_loss_first": 0.22286735475063324,
+  "train_loss_last": 0.0693068876862526,
+  "eval_mse_before": 0.167733,
+  "eval_mse_after": 0.077021,
+  "eval_improvement_pct": 54.08,
   "hold_out_seeds": [
     9998,
     9999
   ],
-  "mean_firing_rate": 0.3137,
-  "active_fraction_pct": 35.7,
+  "mean_firing_rate": 0.3143,
+  "active_fraction_pct": 36.1,
   "task": "self-supervised: predict normalized degree from avg firing rate",
   "note": "500M pipeline ka exact scale-down; hold-out graphs pe before/after MSE = generalization proof",
-  "runtime_min": 1.01
+  "runtime_min": 1.04
 }
