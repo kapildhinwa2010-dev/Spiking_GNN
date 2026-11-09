@@ -77,7 +77,7 @@ GitHub Actions runs the test suite (CPU PyTorch) on every push and pull request 
 
 ## 🌐 Interactive 3D Demo
 
-Open `demo/index.html` in any browser — it works fully offline (CDN modules). The Pages workflow also deploys it automatically to GitHub Pages on every demo change. A 150-neuron 3D brain graph where:
+Open `demo/index.html` in a browser with an internet connection; the page loads Three.js and OrbitControls from a CDN, so it does not work fully offline. The Pages workflow also deploys it automatically to GitHub Pages on every demo change. A 150-neuron 3D brain graph where:
 
 - **Click a neuron = sustained current injection (12 ste
 ps)** — firing propagates multi-hop through the network

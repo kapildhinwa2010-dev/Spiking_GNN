@@ -3,6 +3,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import pytest
 import torch
 
 from graph_builder import make_3d_graph
@@ -19,6 +20,11 @@ def test_make_3d_graph_shapes():
     assert torch.isfinite(x).all()
     assert torch.isfinite(ea).all()
     assert (ei[0] != ei[1]).all()
+
+
+def test_make_3d_graph_rejects_single_node():
+    with pytest.raises(ValueError, match="n must be at least 2"):
+        make_3d_graph(n=1, e=1)
 
 
 def test_model_500m_tiny_forward():
